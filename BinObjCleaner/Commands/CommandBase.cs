@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -13,15 +14,15 @@ namespace BinObjCleaner.Commands
     {
         protected DTE2 _dte;
 
-        protected void Delete(params string[] folders)
+        protected void Delete(params string[] items)
         {
-            IEnumerable<string> existingFolders = folders.Where(f => Directory.Exists(f));
+            var folders = items.Where(f => Directory.Exists(f));
 
-            foreach (string folder in existingFolders)
+            foreach (string folder in folders)
             {
-                IEnumerable<string> files = Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories);
+                var files = Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories);
 
-                if (!files.Any(f => f.EndsWith(".refresh") || _dte.SourceControl.IsItemUnderSCC(f)))
+                if (!files.Any(f => { ThreadHelper.ThrowIfNotOnUIThread(); return f.EndsWith(".refresh") || _dte.SourceControl.IsItemUnderSCC(f); }))
                 {
                     try
                     {
@@ -29,7 +30,7 @@ namespace BinObjCleaner.Commands
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.Write(ex);
+                        Debug.Write(ex);
                     }
                 }
             }
@@ -39,11 +40,8 @@ namespace BinObjCleaner.Commands
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            return _dte.Solution.Projects
-                  .Cast<Project>()
-                  .SelectMany(GetChildProjects)
-                  .Union(_dte.Solution.Projects.Cast<Project>())
-                  .Where(p => { try { return !string.IsNullOrEmpty(p.FullName); } catch { return false; } });
+            return _dte.Solution.Projects.Cast<Project>().SelectMany(GetChildProjects)
+                .Union(_dte.Solution.Projects.Cast<Project>()).Where(p => !string.IsNullOrEmpty(p.FullName));
         }
 
         private static IEnumerable<Project> GetChildProjects(Project parent)
@@ -54,20 +52,21 @@ namespace BinObjCleaner.Commands
             {
                 string vsProjectKindSolutionFolder = "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}";
                 if (parent.Kind != vsProjectKindSolutionFolder && parent.Collection == null)
+                {
                     return Enumerable.Empty<Project>();
+                }
 
                 if (!string.IsNullOrEmpty(parent.FullName))
+                {
                     return new[] { parent };
+                }
             }
             catch (COMException)
             {
                 return Enumerable.Empty<Project>();
             }
 
-            return parent.ProjectItems
-                    .Cast<ProjectItem>()
-                    .Where(p => { ThreadHelper.ThrowIfNotOnUIThread(); return p.SubProject != null; })
-                    .SelectMany(p => { ThreadHelper.ThrowIfNotOnUIThread(); return GetChildProjects(p.SubProject); });
+            return parent.ProjectItems.Cast<ProjectItem>().Where(p => p.SubProject != null).SelectMany(p => GetChildProjects(p.SubProject));
         }
 
         public static string GetProjectRootFolder(Project project)
@@ -76,7 +75,7 @@ namespace BinObjCleaner.Commands
 
             if (string.IsNullOrEmpty(project.FullName))
             {
-                return null;
+                return string.Empty;
             }
 
             string fullPath;
@@ -113,7 +112,7 @@ namespace BinObjCleaner.Commands
                 return Path.GetDirectoryName(fullPath);
             }
 
-            return null;
+            return string.Empty;
         }
     }
 }

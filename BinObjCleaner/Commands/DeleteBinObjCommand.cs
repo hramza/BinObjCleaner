@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.IO;
 using EnvDTE;
 using EnvDTE80;
@@ -8,9 +9,6 @@ using Task = System.Threading.Tasks.Task;
 
 namespace BinObjCleaner.Commands
 {
-    /// <summary>
-    /// Command handler
-    /// </summary>
     internal sealed class DeleteBinObjCommand : CommandBase
     {
         private DeleteBinObjCommand(OleMenuCommandService commandService, DTE2 dte)
@@ -31,27 +29,23 @@ namespace BinObjCleaner.Commands
                 {
                     string root = GetProjectRootFolder(project);
 
-                    if (root == null)
+                    if (string.IsNullOrEmpty(root))
+                    {
                         return;
+                    }
 
-                    string bin = Path.Combine(root, "bin");
-                    string obj = Path.Combine(root, "obj");
-
-                    Delete(bin, obj);
+                    Delete(Path.Combine(root, "bin"), Path.Combine(root, "obj"));
                 }
 
-                _dte.StatusBar.Text = "bin & obj folders are successfully deleted !";
+                _dte.StatusBar.Text = "bin & obj folders have been successfully deleted !";
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.Write(ex);
+                Debug.Write(ex);
             }
         }
 
-        public static DeleteBinObjCommand Instance
-        {
-            get; private set;
-        }
+        public static DeleteBinObjCommand Instance { get; private set; }
 
         public static async Task InitializeAsync(AsyncPackage package)
         {
