@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Include href="KnownImageIds.vsct"/>
+  <Commands package="guidDeleteBinObjCommandPackage">
+    <Buttons>
+      <Button guid="guidDeleteBinObjCommandPackageCmdSet" id="DeleteBinObjCommandId" priority="0x0250" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_FOLDER_EXPLORE" />
+        <Icon guid="ImageCatalogGuid" id="WriteToConsole" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Delete bin and obj folders</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <CommandPlacements>
+    <CommandPlacement guid="guidDeleteBinObjCommandPackageCmdSet" id="DeleteBinObjCommandId" priority="0x0250">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_EXPLORE"/>
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <Symbols>
+    <GuidSymbol name="guidDeleteBinObjCommandPackage" value="{47db9fed-ae8a-4e29-9950-342d0ac12b2b}" />
+
+    <GuidSymbol name="guidDeleteBinObjCommandPackageCmdSet" value="{6c62c01c-a902-4852-ae94-727a5a0b67e4}">
+      <IDSymbol name="DeleteBinObjCommandId" value="100" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
