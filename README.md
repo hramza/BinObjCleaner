@@ -7,4 +7,4 @@ Delete obj and bin folders
 To proceed, right-click in Solution Explorer and select
 **Delete bin and obj folders**
 
-![Context menu](Images/demo.png)
+![Alt text](Images/demo.png)
